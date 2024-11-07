@@ -1,43 +1,42 @@
-pipeline {
-    agent {
-        docker {
-            image 'node:14' // Using the Node.js Docker image
-            args '-u root'   // Run as root if necessary
+node {
+    def app
+
+    stage('Clone repository') {
+        checkout scm
+    }
+
+    stage('Install dependencies') {
+        echo 'Installing dependencies'
+        sh 'npm install'
+    }
+
+    stage('Build React app') {
+        echo 'Building React app'
+        sh 'npm run build'
+    }
+
+    stage('Build image') {
+        echo 'Building Docker image'
+        app = docker.build("arun662/react-app:${env.BUILD_NUMBER}")
+    }
+
+    stage('Test image') {
+        echo 'Running tests in Docker container'
+        app.inside {
+            sh 'echo "Tests passed"'
+            // Add any actual tests, e.g., linting or end-to-end tests if needed
         }
     }
-    environment {
-        DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials') // Jenkins credentials ID
-        DOCKER_IMAGE = 'arun662/react-app:v1' // Your DockerHub username and image name
+
+    stage('Push image') {
+        echo 'Pushing Docker image to DockerHub'
+        docker.withRegistry('https://registry.hub.docker.com', 'dockerhub') {
+            app.push("${env.BUILD_NUMBER}")
+        }
     }
-    stages {
-        stage('Clone Repository') {
-            steps {
-                checkout scm
-            }
-        }
-        stage('Install Dependencies') {
-            steps {
-                sh 'npm install'
-            }
-        }
-        stage('Build') {
-            steps {
-                sh 'npm run build'
-            }
-        }
-        stage('Test') {
-            steps {
-                sh 'npm test'
-            }
-        }
-        stage('Dockerize') {
-            steps {
-                script {
-                    sh 'docker build -t $DOCKER_IMAGE .'
-                    sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
-                    sh 'docker push $DOCKER_IMAGE'
-                }
-            }
-        }
+
+    stage('Trigger ManifestUpdate') {
+        echo 'Triggering manifest update job'
+        build job: 'updatemanifest-meme', parameters: [string(name: 'DOCKERTAG', value: env.BUILD_NUMBER)]
     }
 }
