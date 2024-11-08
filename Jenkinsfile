@@ -6,14 +6,16 @@ node {
         checkout scm
     }
 
-    stage('Cleanup') {
-        echo 'Cleaning up node_modules directory...'
-        sh 'rm -rf node_modules'
-    }
-
     stage('Install dependencies') {
         echo 'Installing dependencies...'
-        sh 'npm ci'  // Uses npm ci for clean installation
+        // Check if node_modules already exists to avoid reinstalling every time
+        script {
+            if (!fileExists('node_modules')) {
+                sh 'npm ci'  // Install dependencies only if node_modules is missing
+            } else {
+                echo 'Dependencies already installed. Skipping npm ci.'
+            }
+        }
     }
 
     stage('Build React app') {
@@ -23,6 +25,7 @@ node {
 
     stage('Build Docker image') {
         echo 'Building Docker image...'
+        // Build Docker image with tag based on the current build number
         app = docker.build("arun662/react-app:${env.BUILD_NUMBER}")
     }
 
@@ -30,16 +33,15 @@ node {
         echo 'Running tests in Docker container...'
         app.inside {
             sh 'echo "Tests passed"'
-            // Add any actual tests here (e.g., linting, unit tests)
+            // Additional tests can be added here if needed
         }
     }
 
     stage('Push Docker image') {
         echo 'Pushing Docker image to DockerHub...'
         docker.withRegistry('https://registry.hub.docker.com', 'dockerhub') {
-            // Push with build number tag
+            // Push image with build number and latest tags
             app.push("${env.BUILD_NUMBER}")
-            // Also push as latest
             app.push("latest")
         }
     }
