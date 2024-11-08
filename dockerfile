@@ -1,23 +1,31 @@
-# Use an official Node.js image
-FROM node:16-alpine
+# Stage 1: Build the React app
+FROM node:16-alpine AS builder
 
-# Set the working directory inside the container
+# Set the working directory
 WORKDIR /app
 
-# Copy the package.json and package-lock.json files to the container
+# Copy package.json and package-lock.json files and install dependencies
 COPY package*.json ./
+RUN npm ci
 
-# Install the dependencies
-RUN npm install
-
-# Copy the rest of the application code
+# Copy the entire source code and build the app
 COPY . .
-
-# Build the React app for production
 RUN npm run build
 
-# Specify the port the app will run on
+# Stage 2: Production image with built app
+FROM node:16-alpine
+
+# Set working directory
+WORKDIR /app
+
+# Copy only the build output from the builder stage
+COPY --from=builder /app/build ./build
+
+# Install a lightweight server to serve the build, like `serve`
+RUN npm install -g serve
+
+# Expose the port the app will run on
 EXPOSE 3000
 
-# Start the React app
-CMD ["npm", "start"]
+# Run the app with `serve` on port 3000
+CMD ["serve", "-s", "build", "-l", "3000"]
