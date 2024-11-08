@@ -8,10 +8,11 @@ node {
 
     stage('Install dependencies') {
         echo 'Installing dependencies...'
-        // Check if node_modules already exists to avoid reinstalling every time
+        // Check if react-scripts exists; if not, run npm ci
         script {
-            if (!fileExists('node_modules')) {
-                sh 'npm ci'  // Install dependencies only if node_modules is missing
+            if (!fileExists('node_modules/react-scripts')) {
+                echo 'react-scripts not found. Running npm ci...'
+                sh 'npm ci'
             } else {
                 echo 'Dependencies already installed. Skipping npm ci.'
             }
@@ -25,7 +26,6 @@ node {
 
     stage('Build Docker image') {
         echo 'Building Docker image...'
-        // Build Docker image with tag based on the current build number
         app = docker.build("arun662/react-app:${env.BUILD_NUMBER}")
     }
 
@@ -33,14 +33,13 @@ node {
         echo 'Running tests in Docker container...'
         app.inside {
             sh 'echo "Tests passed"'
-            // Additional tests can be added here if needed
+            // Add any actual tests here (e.g., linting, unit tests)
         }
     }
 
     stage('Push Docker image') {
         echo 'Pushing Docker image to DockerHub...'
         docker.withRegistry('https://registry.hub.docker.com', 'dockerhub') {
-            // Push image with build number and latest tags
             app.push("${env.BUILD_NUMBER}")
             app.push("latest")
         }
