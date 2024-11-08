@@ -11,14 +11,6 @@ node {
         app = docker.build("arun662/react-app:${env.BUILD_NUMBER}", "--no-cache .")
     }
 
-    stage('Test Docker image') {
-        echo 'Running tests in Docker container...'
-        app.inside("-v \"E:/docker data/Docker\":/var/lib/docker -w /c/ProgramData/Jenkins/.jenkins/workspace/build-image") {
-            sh 'echo "Tests passed"'
-            // Add any actual tests here if needed
-        }
-    }
-
     stage('Push Docker image') {
         echo 'Pushing Docker image to DockerHub...'
         docker.withRegistry('https://registry.hub.docker.com', 'dockerhub') {
