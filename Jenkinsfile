@@ -8,12 +8,13 @@ node {
 
     stage('Build Docker image') {
         echo 'Building Docker image with caching...'
-        app = docker.build("arun662/react-app:${env.BUILD_NUMBER}", "--no-cache .") // Optionally add "--no-cache" if you want a fresh build each time
+        // Adjusting the Docker build command to account for path format if necessary
+        app = docker.build("arun662/react-app:${env.BUILD_NUMBER}", "--no-cache .") 
     }
 
     stage('Test Docker image') {
         echo 'Running tests in Docker container...'
-        app.inside {
+        app.inside('-v /e/docker data/Docker:/var/lib/docker -w /c/ProgramData/Jenkins/.jenkins/workspace/build-image') {
             sh 'echo "Tests passed"'
             // Add any actual tests here if needed
         }
