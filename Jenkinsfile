@@ -8,15 +8,8 @@ node {
 
     stage('Install dependencies') {
         echo 'Installing dependencies...'
-        // Check if react-scripts exists; if not, run npm ci
-        script {
-            if (!fileExists('node_modules/react-scripts')) {
-                echo 'react-scripts not found. Running npm ci...'
-                sh 'npm ci'
-            } else {
-                echo 'Dependencies already installed. Skipping npm ci.'
-            }
-        }
+        // Always install dependencies to avoid missing modules
+        sh 'npm ci'
     }
 
     stage('Build React app') {
@@ -33,7 +26,7 @@ node {
         echo 'Running tests in Docker container...'
         app.inside {
             sh 'echo "Tests passed"'
-            // Add any actual tests here (e.g., linting, unit tests)
+            // Add any actual tests here if needed
         }
     }
 
