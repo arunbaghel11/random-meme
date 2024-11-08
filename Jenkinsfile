@@ -6,20 +6,9 @@ node {
         checkout scm
     }
 
-    stage('Install dependencies') {
-        echo 'Installing dependencies...'
-        // Always install dependencies to avoid missing modules
-        sh 'npm ci'
-    }
-
-    stage('Build React app') {
-        echo 'Building React app...'
-        sh 'npm run build'
-    }
-
     stage('Build Docker image') {
-        echo 'Building Docker image...'
-        app = docker.build("arun662/react-app:${env.BUILD_NUMBER}")
+        echo 'Building Docker image with caching...'
+        app = docker.build("arun662/react-app:${env.BUILD_NUMBER}", "--no-cache .") // Optionally add "--no-cache" if you want a fresh build each time
     }
 
     stage('Test Docker image') {
