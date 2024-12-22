@@ -1,31 +1,26 @@
-# Stage 1: Build the React app
-FROM node:16-alpine AS builder
-
-# Set the working directory
-WORKDIR /app
-
-# Copy package.json and package-lock.json files and install dependencies
-COPY package*.json ./
-RUN npm ci
-
-# Copy the entire source code and build the app
-COPY . .
-RUN npm run build
-
-# Stage 2: Production image with the built app
-FROM node:16-alpine
+# Use Node.js LTS version as the base image
+FROM node:20-alpine
 
 # Set working directory
 WORKDIR /app
 
-# Copy only the build output from the builder stage
-COPY --from=builder /app/build ./build
+# Copy package files
+COPY package*.json ./
 
-# Install a lightweight server to serve the build (serve)
+# Install dependencies
+RUN npm install
+
+# Copy the rest of the application
+COPY . .
+
+# Build the application
+RUN npm run build
+
+# Install serve to run the production build
 RUN npm install -g serve
 
-# Expose the port the app will run on
+# Expose port 3000
 EXPOSE 3000
 
-# Command to run the app with `serve` on port 3000
+# Start the application
 CMD ["serve", "-s", "build", "-l", "3000"]
