@@ -12,7 +12,7 @@ RUN npm ci
 COPY . .
 RUN npm run build
 
-# Stage 2: Production image with built app
+# Stage 2: Production image with the built app
 FROM node:16-alpine
 
 # Set working directory
@@ -21,11 +21,11 @@ WORKDIR /app
 # Copy only the build output from the builder stage
 COPY --from=builder /app/build ./build
 
-# Install a lightweight server to serve the build, like `serve`
+# Install a lightweight server to serve the build (serve)
 RUN npm install -g serve
 
 # Expose the port the app will run on
 EXPOSE 3000
 
-# Run the app with `serve` on port 3000
+# Command to run the app with `serve` on port 3000
 CMD ["serve", "-s", "build", "-l", "3000"]
