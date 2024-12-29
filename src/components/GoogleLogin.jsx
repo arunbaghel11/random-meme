@@ -15,7 +15,7 @@ const GoogleLogin = () => {
     }
   };
 
-  return <button onClick={handleGoogleLogin} className="w-full bg-red-500 text-white p-2 rounded mt-4">Login with Google</button>;
+  return <button onClick={handleGoogleLogin} className="w-full bg-red-500 text-white p-2 rounded mt-4 transition-transform duration-300 hover:scale-105">Login with Google</button>;
 };
 
 export default GoogleLogin;

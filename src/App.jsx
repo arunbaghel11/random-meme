@@ -2,6 +2,7 @@ import React from "react";
 import { BrowserRouter as Router, Route, Routes, Navigate, useNavigate } from "react-router-dom";
 import Signup from "./components/Signup";
 import Login from "./components/Login";
+import ForgotPassword from "./components/ForgotPassword";
 import { useAuth } from "./context/AuthProvider";
 import Random from "./components/Random";
 import Tag from "./components/Tag";
@@ -26,12 +27,12 @@ const MainUI = () => {
 
   return (
     <div className="w-full h-screen flex flex-col background relative items-center overflow-x-hidden">
-      <h1 className="bg-white rounded-lg uppercase w-11/12 text-center mt-[40px] ml-[15px] py-2 px-10 text-4xl font-bold ">
+      <h1 className="bg-white rounded-lg uppercase w-11/12 text-center mt-[40px] ml-[15px] py-2 px-10 text-4xl font-bold transform transition-transform duration-500 hover:scale-105">
         Random Gifs
       </h1>
       <button
         onClick={handleLogout}
-        className="absolute top-24 right-14  bg-red-500 text-white p-2 rounded"
+        className="absolute top-24 right-14 bg-red-500 text-white p-2 rounded transition-transform duration-300 hover:scale-105"
       >
         Log Out
       </button>
@@ -49,6 +50,7 @@ export default function App() {
       <Routes>
         <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
         {/* Protect the main UI */}
         <Route
           path="/"
