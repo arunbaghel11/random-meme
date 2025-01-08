@@ -1,5 +1,5 @@
-# Stage 1: Build the React app
-FROM node:18-alpine AS builder
+# Use Node.js for building and running the app
+FROM node:20-alpine
 
 # Set working directory
 WORKDIR /app
@@ -13,17 +13,8 @@ RUN npm install
 # Copy the rest of the application code
 COPY . .
 
-# Build the React application
-RUN npm run build
+# Expose port 3000 for the React development server
+EXPOSE 3000
 
-# Stage 2: Serve the built app using Nginx
-FROM nginx:1.23-alpine
-
-# Copy the built React app from the builder stage to Nginx's web directory
-COPY --from=builder /app/build /usr/share/nginx/html
-
-# Expose port 80
-EXPOSE 80
-
-# Start Nginx server
-CMD ["nginx", "-g", "daemon off;"]
+# Start the React development server
+CMD ["npm", "start"]
